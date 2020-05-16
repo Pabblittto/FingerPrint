@@ -18,11 +18,13 @@ public Zwracanytyp funkcja(Rect rect, int[,] AllArea){
 
     Zwracanytyp result = new Zwracanytyp();
 
-    for (Int32 y = 0; y < area.Height; ++y)
+    for (Int32 y = 0; y < rect.Height; ++y)
     {
-        for (Int32 x = 0; x < area.Width; ++x)
+        for (Int32 x = 0; x < rect.Width; ++x)
         {
-            // tu jakieœ dzia³ania na ka¿dym pikselu z wycinka 
+            result[allArea[y + rect.Y, x + rect.X]]++;
+			// tu jakies dzia³ania na pixelach , nalezy poamiêtaæ o dodawniu 
+			//wartoœci lokalnych x,y do wartoœci rect.Y i rect.X
         }
     }
     return result;
