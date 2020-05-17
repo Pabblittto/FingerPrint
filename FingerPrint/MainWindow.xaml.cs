@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
 using System.Drawing;
+using FingerPrint.ExtraWindows;
 
 namespace FingerPrint
 {
@@ -25,6 +26,9 @@ namespace FingerPrint
     {
         OpenFileDialog imageDialog = new OpenFileDialog();
         SaveFileDialog imgSaveDialog = new SaveFileDialog();
+
+        TheresholdInput inputwindow;
+
         Bitmap Img;
 
         public MainWindow()
@@ -147,7 +151,14 @@ namespace FingerPrint
 
         private void TheresholdBin_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Jeszcze nie zaimplementowane. Uzyj Metody otsu.");
+            inputwindow = new TheresholdInput();
+            if (inputwindow.ShowDialog() == true)
+            {
+                int value = inputwindow.result;
+                var tmp=Binarization.GetInstance().BinarizeThereshol(Img, value,true);
+                Img = tmp;
+                UpdateImageOnScreen();
+            }
         }
 
         private void GrayScale_Click(object sender, RoutedEventArgs e)
@@ -159,8 +170,17 @@ namespace FingerPrint
 
         private void Szkieletyzacja_Click(object sender, RoutedEventArgs e)
         {
-            var tmp = Szkieletyzacja.GetInstance().Szkieletyzuj(Img);
-            Img = tmp;
+            try
+            {
+                var tmp = Szkieletyzacja.GetInstance().Szkieletyzuj(Img);
+                Img = tmp;
+                MessageBox.Show("Operacja zakończona.");
+            }catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                
+            }
+
 
             UpdateImageOnScreen();
         }

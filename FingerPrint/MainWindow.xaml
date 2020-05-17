@@ -33,10 +33,10 @@
             </Grid.ColumnDefinitions>
             
             <ScrollViewer Grid.Column="0"  HorizontalScrollBarVisibility="Auto">
-                <Image Name="modifiedImage" Stretch="None"/>
+                <Image Name="modifiedImage" Stretch="None"  RenderOptions.BitmapScalingMode="NearestNeighbor"/>
             </ScrollViewer>
             <ScrollViewer Name="loadedImageScrollViewer" Grid.Column="1" >
-                <Image Name="loadedImage" />
+                <Image Name="loadedImage" RenderOptions.BitmapScalingMode="NearestNeighbor" />
             </ScrollViewer>
         </Grid>
         <Grid Grid.Row="2">
