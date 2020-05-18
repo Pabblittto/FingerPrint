@@ -28,7 +28,6 @@ namespace FingerPrint
             System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, Img.Width, Img.Height);
             BitmapData bitmapData = Img.LockBits(rect, ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
             IntPtr ptr = bitmapData.Scan0;// wskaźnik na pierwszą linię obrazka
-            int BitsPerPixel = 24;// na jeden pixel składają się trzy 8-bitowe wartości RGB
             int size = bitmapData.Width * bitmapData.Height * 3;
 
             byte[] data = new byte[size];// tablica z wartościami RGB
@@ -45,7 +44,6 @@ namespace FingerPrint
             int[,] tmpImageInArray = (int[,])imageIn2DTable.Clone();
 
             int halfEdge = 1;// połowa okienka to jeden piksel ponieważ analizujemy okno 3x3 wokół każdego pixela
-            int windowWidth = 3;// okno ma 3pixele 
             int CN = 0;
             int sum = 0;
             List<Point> singlePointsList = new List<Point>();
@@ -77,13 +75,11 @@ namespace FingerPrint
                                 case 0:
                                     // Pojedynczy punkt
                                     singlePointsList.Add(new Point(j, i));
-                                    //tmpImageInArray[i, j] = 100;
                                     drawCharacteristicPoints(new Point(j,i),tmpImageInArray, Img);
                                     break;
                                 case 1:
                                     // Zakończenie krawędzi
                                     endsOfEdgeList.Add(new Point(j, i));
-                                    //tmpImageInArray[i, j] = 100;
                                     drawCharacteristicPoints(new Point(j, i), tmpImageInArray, Img);
                                     break;
                                 case 2:
@@ -92,13 +88,11 @@ namespace FingerPrint
                                 case 3:
                                     // Rozwidlenie
                                     forksList.Add(new Point(j, i));
-                                    //tmpImageInArray[i, j] = 100;
                                     drawCharacteristicPoints(new Point(j, i), tmpImageInArray, Img);
                                     break;
                                 case 4:
                                     // Skrzyżowanie
                                     intersectionsList.Add(new Point(j, i));
-                                    //tmpImageInArray[i, j] = 100;
                                     drawCharacteristicPoints(new Point(j, i), tmpImageInArray, Img);
                                     break;
                             }
