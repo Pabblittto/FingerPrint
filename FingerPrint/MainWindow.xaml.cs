@@ -65,6 +65,23 @@ namespace FingerPrint
             }
         }
 
+        public void UpdateOriginalImage()
+        {
+
+            using (MemoryStream memory = new MemoryStream())
+            {
+                Img.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                GC.KeepAlive(memory);
+                memory.Position = 0;
+                BitmapImage bitmapimage = new BitmapImage();
+                bitmapimage.BeginInit();
+                bitmapimage.StreamSource = memory;
+                bitmapimage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapimage.EndInit();
+
+                loadedImage.Source = bitmapimage;
+            }
+        }
 
 
         private void Exit_Click(object sender, RoutedEventArgs e)
@@ -192,7 +209,7 @@ namespace FingerPrint
 
             Img = tmp;
 
-            UpdateImageOnScreen();
+            UpdateOriginalImage();
         }
     }
 }
