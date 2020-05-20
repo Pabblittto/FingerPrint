@@ -30,6 +30,10 @@ namespace FingerPrint
         TheresholdInput inputwindow;
 
         Bitmap Img;
+        List<System.Drawing.Point> singlePointsList = new List<System.Drawing.Point>();
+        List<System.Drawing.Point> endsOfEdgeList = new List<System.Drawing.Point>();
+        List<System.Drawing.Point> forksList = new List<System.Drawing.Point>();
+        List<System.Drawing.Point> intersectionsList = new List<System.Drawing.Point>();
 
         public MainWindow()
         {
@@ -63,6 +67,24 @@ namespace FingerPrint
 
                 modifiedImage.Source = bitmapimage;
             }
+        }
+
+        public void SwitchImageOnScreen(Bitmap tmpImage)
+        {
+            using (MemoryStream memory = new MemoryStream())
+            {
+                Img.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                GC.KeepAlive(memory);
+                memory.Position = 0;
+                BitmapImage bitmapimage = new BitmapImage();
+                bitmapimage.BeginInit();
+                bitmapimage.StreamSource = memory;
+                bitmapimage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapimage.EndInit();
+
+                modifiedImage.Source = bitmapimage;
+            }
+            Img = tmpImage;
         }
 
 
@@ -184,14 +206,39 @@ namespace FingerPrint
             UpdateImageOnScreen();
         }
 
-
         private void Rozgalezienia_Click(object sender, RoutedEventArgs e)
         {
             try {
+                var tmpImage = Img.Clone(new System.Drawing.Rectangle(0, 0, Img.Width, Img.Height), Img.PixelFormat);
                 var tmp = Rozgalezienia.GetInstance().Find(Img);
                 Img = tmp;
+                this.singlePointsList = Rozgalezienia.GetInstance().getSinglePointsList();
+                this.endsOfEdgeList = Rozgalezienia.GetInstance().getEndsOfEdgeList();
+                this.forksList = Rozgalezienia.GetInstance().getForksList();
+                this.intersectionsList = Rozgalezienia.GetInstance().getIntersectionsList();
                 MessageBox.Show("Operacja zakończona.");
-            }catch(Exception ex)
+                SwitchImageOnScreen(tmpImage);
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            
+        }
+
+        private void Usuwanie_minucji_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                UsuniecieMinucji.GetInstance().SetSinglePointsList(this.singlePointsList);
+                UsuniecieMinucji.GetInstance().SetEndsOfEdgeList(this.endsOfEdgeList);
+                UsuniecieMinucji.GetInstance().SetForksList(this.forksList);
+                UsuniecieMinucji.GetInstance().SetIntersectionsList(this.intersectionsList);
+                var tmp = UsuniecieMinucji.GetInstance().UsunMinucje(Img);
+                Img = tmp;
+                MessageBox.Show("Operacja zakończona.");
+            }
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }

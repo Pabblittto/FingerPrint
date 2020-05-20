@@ -25,6 +25,7 @@
             <MenuItem Header="Gray scale" MinWidth="75" Name="grayScale" Click="GrayScale_Click"/>
             <MenuItem Header="Szkieletyzacja" MinWidth="75" Name="szkieletyzacja" Click="Szkieletyzacja_Click" />
             <MenuItem Header="Rozgalezienia" MinWidth="75" Name="galezie" Click="Rozgalezienia_Click" />
+            <MenuItem Header="Usuń minucje" MinWidth="75" Name="usuwanie_minucji" Click="Usuwanie_minucji_Click" />
         </Menu>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>

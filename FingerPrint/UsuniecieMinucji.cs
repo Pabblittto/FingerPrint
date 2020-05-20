@@ -9,45 +9,45 @@ using System.Threading.Tasks;
 
 namespace FingerPrint
 {
-    class Rozgalezienia
+    class UsuniecieMinucji
     {
-        private static Rozgalezienia instance = new Rozgalezienia();
+        private static UsuniecieMinucji instance = new UsuniecieMinucji();
         List<Point> singlePointsList = new List<Point>();
         List<Point> endsOfEdgeList = new List<Point>();
         List<Point> forksList = new List<Point>();
         List<Point> intersectionsList = new List<Point>();
 
-        private Rozgalezienia()
+        private UsuniecieMinucji()
         {
-                
+
         }
 
-        public static Rozgalezienia GetInstance()
+        public static UsuniecieMinucji GetInstance()
         {
             return instance;
         }
 
-        public List<Point> getSinglePointsList()
+        public void SetSinglePointsList(List<Point> singlePointsList)
         {
-            return this.singlePointsList;
+            this.singlePointsList = singlePointsList;
         }
 
-        public List<Point> getEndsOfEdgeList()
+        public void SetEndsOfEdgeList(List<Point> endsOfEdgeList)
         {
-            return this.endsOfEdgeList;
+            this.endsOfEdgeList = endsOfEdgeList;
         }
 
-        public List<Point> getForksList()
+        public void SetForksList(List<Point> forksList)
         {
-            return this.forksList;
+            this.forksList = forksList;
         }
 
-        public List<Point> getIntersectionsList()
+        public void SetIntersectionsList(List<Point> intersectionsList)
         {
-            return this.intersectionsList;
+            this.intersectionsList = intersectionsList;
         }
 
-        public Bitmap Find(Bitmap Img)
+        public Bitmap UsunMinucje(Bitmap Img)
         {
             System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, Img.Width, Img.Height);
             BitmapData bitmapData = Img.LockBits(rect, ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
@@ -67,7 +67,19 @@ namespace FingerPrint
             imageIn2DTable = Functions.GetInstance().ChangeBinarizedImage(imageIn2DTable, bitmapData, Img);
             int[,] tmpImageInArray = (int[,])imageIn2DTable.Clone();
 
-            int halfEdge = 1;// połowa okienka to jeden piksel ponieważ analizujemy okno 3x3 wokół każdego pixela
+            tmpImageInArray = this.ClearFalseMinutiaeOfOneType(singlePointsList, tmpImageInArray);
+            tmpImageInArray = this.ClearFalseMinutiaeOfOneType(endsOfEdgeList, tmpImageInArray);
+            tmpImageInArray = this.ClearFalseMinutiaeOfOneType(forksList, tmpImageInArray);
+            tmpImageInArray = this.ClearFalseMinutiaeOfOneType(intersectionsList, tmpImageInArray);
+
+            imageIn2DTable = (int[,])tmpImageInArray.Clone();
+
+            singlePointsList.Clear();
+            endsOfEdgeList.Clear();
+            forksList.Clear();
+            intersectionsList.Clear();
+
+            int halfEdge = 1;
             int CN = 0;
             int sum = 0;
 
@@ -123,19 +135,9 @@ namespace FingerPrint
                 }
             }
 
-            /// /////////////////////////////////////// 
-            /// Miejsce na kod, w tablicy data zajduje sie obraz
-            /// znajduje się on w taki sposób że co trzy komórki znajduje się pierwszy odcień (R) danego pixela
-            /// to znaczy żeby sie dostać do wartosci R w drugim pikselu trzeba iśc do 3 komórki
-            /// ponieważ trzy pierwsze komórki są zajmopwane przez wartości R,G,B pierwszego pixela
-            /// żeby zapisać zaminy które wykonał algorytm trzeba zapisać nowe wartości do tablicy data
-            /// wtedy kod na dole funkcji wsadzi te dane do obiektu Img i będzie git.
-            /// Sprawdz wszystkie Funkcje znajdujące się w Singletonie Functions może ci się przydadzą :)
-            /// Może dodatkowo niech funkcja zwraca tablice obiektów typu Point które okreslają w ktorych miejscach te
-            /// rozgałęzienia wystepują
             data = Functions.GetInstance().CreateBytetableFrom2DImage(tmpImageInArray, size, bitmapData.Width, bitmapData.Height);
 
-            for (int i = 0; i < size; i+=3)
+            for (int i = 0; i < size; i += 3)
             {
                 if (data[i] == 100)
                 {
@@ -149,14 +151,15 @@ namespace FingerPrint
                     data[i + 1] = 255;
                     data[i + 2] = 255;
                 }
-                else {
+                else
+                {
                     data[i] = 0;
                     data[i + 1] = 0;
                     data[i + 2] = 0;
                 }
             }
 
-            /// Poniżej kod do zamiany obrazu z data do obiektu Bitmap
+
             for (int y = 0; y < bitmapData.Height; y++)
             {
                 IntPtr mem = (IntPtr)((long)bitmapData.Scan0 + y * bitmapData.Stride);
@@ -168,12 +171,73 @@ namespace FingerPrint
             return Img;
         }
 
+        public Point IsInMask(Point parent, Point child)
+        {
+            if (Math.Abs(parent.X - child.X) <= 3 && Math.Abs(parent.Y - child.Y) <= 3)
+            {
+                if((Math.Abs(parent.X - child.X) == 0 && Math.Abs(parent.Y - child.Y) == 0)) {
+                    return new Point(-1, -1);
+                }
+                else
+                {
+                    return new Point(child.X, child.Y);
+                }
+                
+            }
+            else
+            {
+                return new Point(-1, -1);
+            }
+        }
+
+        public int[,] ClearFalseMinutiaeOfOneType(List<Point> list, int[,] imageIn2DTable)
+        {
+            int counter = 0;
+            int overallCounter = 0;
+            List<Point> pointsToDelete = new List<Point>();
+
+            foreach (var parentSinglePoint in list)
+            {
+                counter = 0;
+                foreach (var childSinglePoint in list)
+                {
+                    var investigatedPoint = this.IsInMask(parentSinglePoint, childSinglePoint);
+                    if (investigatedPoint.X == -1)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        pointsToDelete.Add(investigatedPoint);
+                        counter++;
+                        overallCounter++;
+                    }
+                }
+                if (pointsToDelete.Count < 2)
+                {
+                    continue;
+                }
+                else
+                {
+                    // usun
+                    imageIn2DTable[parentSinglePoint.Y, parentSinglePoint.X] = 0;
+                    foreach (var pointToDelete in pointsToDelete)
+                    {
+                        imageIn2DTable[pointToDelete.Y, pointToDelete.X] = 0;
+                    }
+                    
+                }
+                pointsToDelete.Clear();
+            }
+            return imageIn2DTable;
+        }
+
         public int[,] drawCharacteristicPoints(Point coordinates, int[,] table, Bitmap bitmapImage)
         {
             int maskSize = 5;
             int scope = maskSize / 2;
             int xCoordinate = coordinates.X;// koordynaty górnego lewego pixela w oknie 
-            int yCoordinate= coordinates.Y;
+            int yCoordinate = coordinates.Y;
 
 
             if (!(yCoordinate - scope < 0 || yCoordinate + scope >= bitmapImage.Height || xCoordinate - scope < 0 || xCoordinate + scope >= bitmapImage.Width))
@@ -188,6 +252,7 @@ namespace FingerPrint
                         }
                     }
                 }
+
             }
             else
             {
@@ -198,7 +263,7 @@ namespace FingerPrint
 
         public bool isPixelNeighbour(int rootX, int rootY, int inspectedX, int inspectedY)
         {
-            if(Math.Abs(rootX - inspectedX) <= 1 && Math.Abs(rootY - inspectedY) <= 1)
+            if (Math.Abs(rootX - inspectedX) <= 1 && Math.Abs(rootY - inspectedY) <= 1)
             {
                 return true;
             }
@@ -207,5 +272,6 @@ namespace FingerPrint
                 return false;
             }
         }
+
     }
 }

@@ -62,6 +62,7 @@
     <Compile Include="Functions.cs" />
     <Compile Include="Rozgalezienia.cs" />
     <Compile Include="Szkieletyzacja.cs" />
+    <Compile Include="UsuniecieMinucji.cs" />
     <Page Include="ExtraWindows\TheresholDInput.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
