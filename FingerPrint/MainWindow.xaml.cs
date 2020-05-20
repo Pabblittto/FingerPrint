@@ -65,24 +65,6 @@ namespace FingerPrint
             }
         }
 
-        public void UpdateOriginalImage()
-        {
-
-            using (MemoryStream memory = new MemoryStream())
-            {
-                Img.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
-                GC.KeepAlive(memory);
-                memory.Position = 0;
-                BitmapImage bitmapimage = new BitmapImage();
-                bitmapimage.BeginInit();
-                bitmapimage.StreamSource = memory;
-                bitmapimage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapimage.EndInit();
-
-                loadedImage.Source = bitmapimage;
-            }
-        }
-
 
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
@@ -205,11 +187,15 @@ namespace FingerPrint
 
         private void Rozgalezienia_Click(object sender, RoutedEventArgs e)
         {
-            var tmp = Rozgalezienia.GetInstance().Find(Img);
-
-            Img = tmp;
-
-            UpdateOriginalImage();
+            try {
+                var tmp = Rozgalezienia.GetInstance().Find(Img);
+                Img = tmp;
+                MessageBox.Show("Operacja zakończona.");
+            }catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            UpdateImageOnScreen();
         }
     }
 }
